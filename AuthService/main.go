@@ -1,9 +1,13 @@
 package main
 
-import app "GoAuth/Application"
+import (
+	config "GoAuth/Config/env"
+	app "GoAuth/app"
+)
 
 func main() {
-	config := app.NewConfig(":3001")
+	config.Load()
+	config := app.NewConfig()
 	app := app.NewApplication(config)
 	app.Run()
 }
