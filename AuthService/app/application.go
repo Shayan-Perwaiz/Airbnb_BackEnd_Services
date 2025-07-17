@@ -1,6 +1,7 @@
 package app
 
 import (
+	dbconfig "GoAuth/Config/db"
 	config "GoAuth/Config/env"
 	controller "GoAuth/Controllers"
 	router "GoAuth/Router"
@@ -38,7 +39,12 @@ func NewApplication(cfg Config) *Application{
 
 func (app *Application) Run() error {
 
-	ur := db.NewUserRepository()
+	database, err := dbconfig.SetUpDB()
+	if err != nil{
+		fmt.Println("Failed to conenct the databse")
+	}
+
+	ur := db.NewUserRepository(database)
 	us := services.NewUserService(ur)
 	uc := controller.NewUserController(us)
 	uRouter := router.NewUserRouter(uc)
