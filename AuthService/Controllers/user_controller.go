@@ -27,3 +27,15 @@ func (uc *UserController) LoginUser(w http.ResponseWriter, r *http.Request){
 	uc.userService.LoginUser()
 	w.Write([]byte("Login User endpoint"))
 }
+
+func (uc *UserController) FetchUserbyId(w http.ResponseWriter, r *http.Request){
+	fmt.Println("fetching user by Id")
+	uc.userService.UserById()
+	w.Write([]byte("fetch by id endpoint"))
+}
+
+func (uc *UserController) FetchAllUser(w http.ResponseWriter, r *http.Request){
+	fmt.Println("fetching all users")
+	uc.userService.GetAllUsers()
+	w.Write([]byte("fetching all users endpoint"))
+}

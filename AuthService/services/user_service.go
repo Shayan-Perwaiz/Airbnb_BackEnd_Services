@@ -13,6 +13,8 @@ import (
 type UserService interface {
 	CreateUser() error
 	LoginUser() (string,error)
+	UserById() error
+	GetAllUsers() error
 }
 
 type UserServiceImpl struct {
@@ -38,7 +40,7 @@ func (us *UserServiceImpl) LoginUser() (string,error){
 	textpassword := "filziperwaiz"
 	userDetail, err := us.userRepository.GetUserByEmail(email)
 	if err != nil{
-		fmt.Println("Error fetching the suer")
+		fmt.Println("Error fetching the user")
 		return "", err
 	}
 	if userDetail == nil {
@@ -73,5 +75,40 @@ func (us *UserServiceImpl) LoginUser() (string,error){
 	fmt.Println("JWT Token :",tokenString)
 
 	return tokenString, nil
+}
+
+func(us *UserServiceImpl) UserById() error{
+	var id int64 = 3
+	user, err := us.userRepository.GetUserByID(id)
+	if err != nil{
+		fmt.Println("error fetching the user")
+		return err
+	}
+
+	if user == nil{
+		fmt.Println("no user found with id", id)
+		return err
+	}
+	fmt.Println(user)
+	return nil
+}
+
+func(us *UserServiceImpl) GetAllUsers() error{
+	users, err := us.userRepository.GetAll()
+	if err != nil{
+		fmt.Println("error fetching the users")
+		return err
+	}
+
+	if users == nil{
+		fmt.Println("no users found")
+		return err
+	}
+
+	for _, user := range users {
+    fmt.Println(user)
+    }
+
+	return nil
 }
 

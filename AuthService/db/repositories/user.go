@@ -10,7 +10,8 @@ type UserRepository interface {
 	GetAll() ([]*models.User, error)
 	DeleteById(id int64) error
 	Create(username string, email string, password string) error
-	GetUserByEmail(email string) (*models.User, error)
+	GetUserByEmail(email string)  (*models.User, error)
+	GetUserByID(id int64) (*models.User, error)
 }
 
 type UserRepositoryImpl struct {
@@ -105,4 +106,23 @@ func (u *UserRepositoryImpl) GetUserByEmail(email string) (*models.User, error){
 	}
 	fmt.Println("User fetched successfully with email", email)
 	return user, nil
+}
+
+func (u *UserRepositoryImpl) GetUserByID(id int64) (*models.User, error) {
+    query := "SELECT id, username, email, password, created_at, updated_at FROM users WHERE id = ?"
+    row := u.db.QueryRow(query, id)
+
+    user := &models.User{}
+    err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.Created_At, &user.Updated_At)
+    if err != nil {
+        if err == sql.ErrNoRows {
+            fmt.Println("No user found with this ID:", id)
+            return nil, fmt.Errorf("no user found with id: %d", id)
+        }
+        fmt.Println("Error fetching user:", err)
+        return nil, fmt.Errorf("error fetching user: %w", err)
+    }
+
+    fmt.Println("User fetched successfully with ID:", id)
+    return user, nil
 }
