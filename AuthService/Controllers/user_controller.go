@@ -1,7 +1,9 @@
 package controller
 
 import (
+	"GoAuth/dto"
 	"GoAuth/services"
+	util "GoAuth/utils"
 	"fmt"
 	"net/http"
 )
@@ -24,8 +26,24 @@ func (uc *UserController)RegisterUser(w http.ResponseWriter, r *http.Request){
 
 func (uc *UserController) LoginUser(w http.ResponseWriter, r *http.Request){
 	fmt.Println("Login in the user")
-	uc.userService.LoginUser()
-	w.Write([]byte("Login User endpoint"))
+	var paylaod dto.LoginUserRequestDto
+	if err := util.ReadJsonBody(r, &paylaod); err != nil{
+		w.Write([]byte("something went wrong"))
+		return
+	}
+
+	if validationError := util.Validator.Struct(paylaod); validationError != nil{
+		w.Write([]byte("Invalid input data"))
+		return
+
+	}
+	jwtToken, err := uc.userService.LoginUser(&paylaod)
+	if err != nil{
+		w.Write([]byte("Error arises"))
+		return
+	}
+	util.WriteJsonSuccessResponse(w, "User logged in Successfully", jwtToken)
+	
 }
 
 func (uc *UserController) FetchUserbyId(w http.ResponseWriter, r *http.Request){

@@ -3,6 +3,7 @@ package services
 import (
 	configEnv "GoAuth/Config/env"
 	db "GoAuth/db/repositories"
+	"GoAuth/dto"
 	util "GoAuth/utils"
 	"fmt"
 
@@ -12,7 +13,7 @@ import (
 
 type UserService interface {
 	CreateUser() error
-	LoginUser() (string,error)
+	LoginUser(payload *dto.LoginUserRequestDto) (string,error)
 	UserById() error
 	GetAllUsers() error
 }
@@ -35,10 +36,8 @@ func (us *UserServiceImpl) CreateUser() error{
 	return nil
 }
 
-func (us *UserServiceImpl) LoginUser() (string,error){
-	email := "filzi@123gmail.com"
-	textpassword := "filziperwaiz"
-	userDetail, err := us.userRepository.GetUserByEmail(email)
+func (us *UserServiceImpl) LoginUser(payload *dto.LoginUserRequestDto) (string,error){
+	userDetail, err := us.userRepository.GetUserByEmail(payload.Email)
 	if err != nil{
 		fmt.Println("Error fetching the user")
 		return "", err
@@ -47,26 +46,27 @@ func (us *UserServiceImpl) LoginUser() (string,error){
 		fmt.Print("No user found with the given email")
 		return "",err
 	}
-	isValidPassword := util.ValidatePassword(userDetail.Password, textpassword)
+	isValidPassword := util.ValidatePassword(userDetail.Password, payload.Password)
 
 	if !isValidPassword{
 		fmt.Println("Password does not match")
 	}
 
 	fmt.Println("Here is the user details below: ")
-	fmt.Println(userDetail.ID)
-	fmt.Println(userDetail.Username)
-	fmt.Println(userDetail.Email)
-	fmt.Println(userDetail.Password)
-	fmt.Println(userDetail.Created_At)
+	// fmt.Println(userDetail.ID)
+	// fmt.Println(userDetail.Username)
+	// fmt.Println(userDetail.Email)
+	// fmt.Println(userDetail.Password)
+	// fmt.Println(userDetail.Created_At)
+	fmt.Println(&userDetail)
 
-	paylaod := jwt.MapClaims{
+	jwtPaylaod := jwt.MapClaims{
 		"user_id" : userDetail.ID,
 		"user_email" : userDetail.Email,
 		"user_name": userDetail.Username,
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, paylaod)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwtPaylaod)
 	tokenString, err := token.SignedString([]byte(configEnv.GetString("JWT_TOKEN", "TOKEN")))
 	if err != nil{
 		fmt.Println("error creating a JWT token")
