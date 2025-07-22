@@ -21,3 +21,9 @@ func (uc *UserController)RegisterUser(w http.ResponseWriter, r *http.Request){
 	uc.userService.CreateUser()
 	w.Write([]byte("User Registeration endpoint"))
 }
+
+func (uc *UserController) LoginUser(w http.ResponseWriter, r *http.Request){
+	fmt.Println("Login in the user")
+	uc.userService.LoginUser()
+	w.Write([]byte("Login User endpoint"))
+}

@@ -9,7 +9,8 @@ import (
 type UserRepository interface {
 	GetAll() ([]*models.User, error)
 	DeleteById(id int64) error
-	Create() error
+	Create(username string, email string, password string) error
+	GetUserByEmail(email string) (*models.User, error)
 }
 
 type UserRepositoryImpl struct {
@@ -22,8 +23,25 @@ func NewUserRepository(db *sql.DB) UserRepository {
 	}
 }
 
-func (u *UserRepositoryImpl) Create() error {
+func (u *UserRepositoryImpl) Create(username string, email string, password string) error {
 	fmt.Println("This is repo layer")
+	query := "INSERT INTO users (username, email, password) VALUES (?, ?, ?)"
+	user, err := u.db.Exec(query, username, email, password)
+	if err != nil{
+		fmt.Printf("Error in query")
+		return fmt.Errorf("error inserting the user: %v", err)
+
+	}
+	rowsAffected, err := user.RowsAffected()
+	if err != nil{
+		return err
+	}
+	if rowsAffected == 0 {
+		fmt.Println("User is not created in storage")
+		return fmt.Errorf("user is not created properly %v", err)
+	}
+
+	fmt.Println("User created")
 	
 	return nil
 }
@@ -68,4 +86,23 @@ func(u *UserRepositoryImpl) DeleteById(id int64) error{
 	fmt.Println("User successfully deleted with id", id)
 
 	return nil
+}
+
+func (u *UserRepositoryImpl) GetUserByEmail(email string) (*models.User, error){
+	query := "SELECT id, username, email , password, created_at FROM users WHERE email = ?"
+	row := u.db.QueryRow(query, email)
+
+	user := &models.User{}
+	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.Created_At)
+	if err != nil{
+		if err == sql.ErrNoRows{
+		fmt.Println("No such user is found with this email:", email)
+		return nil, fmt.Errorf("no user found with email: %s", email)
+		}
+		fmt.Println("Error fetching user:", err)
+		return nil, fmt.Errorf("error fetching user: %w", err)
+
+	}
+	fmt.Println("User fetched successfully with email", email)
+	return user, nil
 }
