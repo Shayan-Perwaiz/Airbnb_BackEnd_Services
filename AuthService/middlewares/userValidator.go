@@ -37,8 +37,9 @@ func CreateUserRequestValidator(next http.Handler) http.Handler{
 			return
 		}
 			fmt.Println("Payload received for User Creation :", payload)
-
-		next.ServeHTTP(w, r)
+			ctx := context.WithValue(r.Context(), "payload", payload)
+		    next.ServeHTTP(w, r.WithContext(ctx))
+            next.ServeHTTP(w, r)
 	})
 }
 
