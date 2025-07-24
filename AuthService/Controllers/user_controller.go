@@ -26,20 +26,13 @@ func (uc *UserController)RegisterUser(w http.ResponseWriter, r *http.Request){
 
 func (uc *UserController) LoginUser(w http.ResponseWriter, r *http.Request){
 	fmt.Println("Login in the user")
-	var paylaod dto.LoginUserRequestDto
-	if err := util.ReadJsonBody(r, &paylaod); err != nil{
-		w.Write([]byte("something went wrong"))
-		return
-	}
+	
+	payload := r.Context().Value("payload").(dto.LoginUserRequestDto)
+	fmt.Println("Payload received in controller layer:", payload)
 
-	if validationError := util.Validator.Struct(paylaod); validationError != nil{
-		w.Write([]byte("Invalid input data"))
-		return
-
-	}
-	jwtToken, err := uc.userService.LoginUser(&paylaod)
+	jwtToken, err := uc.userService.LoginUser(&payload)
 	if err != nil{
-		w.Write([]byte("Error arises"))
+		util.WriteJsonErrorResponse(w, "User error logging in", "unable to create login token")
 		return
 	}
 	util.WriteJsonSuccessResponse(w, "User logged in Successfully", jwtToken)

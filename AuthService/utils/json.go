@@ -25,7 +25,7 @@ func ReadJsonBody(r *http.Request, result any) error{
 	return decoder.Decode(result)
 }
 
-func WriteJsonSuccessResponse(w http.ResponseWriter, message string, data string) error{
+func WriteJsonSuccessResponse(w http.ResponseWriter, message string, data any) error{
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	response_data := map[string] any{
@@ -34,5 +34,15 @@ func WriteJsonSuccessResponse(w http.ResponseWriter, message string, data string
 		"success" : true,
 	}
 	return json.NewEncoder(w).Encode(response_data)
-	
+}
+
+func WriteJsonErrorResponse(w http.ResponseWriter, message string, data any) error{
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusBadRequest)
+	response_data := map[string] any{
+		"message" : message,
+		"data" : data,
+		"success" : false,
+	}
+	return json.NewEncoder(w).Encode(response_data)
 }
