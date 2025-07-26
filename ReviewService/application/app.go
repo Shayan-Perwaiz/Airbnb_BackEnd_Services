@@ -4,6 +4,7 @@ import (
 	dbconfig "GoReview/configs/db"
 	config "GoReview/configs/env"
 	"GoReview/repository/db"
+	"GoReview/router"
 	"fmt"
 	"net/http"
 	"time"
@@ -39,6 +40,7 @@ func(app *Application) Run(){
 
 	server := &http.Server{
 		Addr : app.Config.Address,
+		Handler: router.SetUpRouter(),
 	    ReadTimeout:    10 * time.Second,
 	    WriteTimeout:   10 * time.Second,
 	}
