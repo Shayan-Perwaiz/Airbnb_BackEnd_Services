@@ -1,7 +1,9 @@
 package app
 
 import (
+	dbconfig "GoReview/configs/db"
 	config "GoReview/configs/env"
+	"GoReview/repository/db"
 	"fmt"
 	"net/http"
 	"time"
@@ -29,6 +31,12 @@ func NewApplication(_cfg Config) *Application{
 }
 
 func(app *Application) Run(){
+	dbConnector, err := dbconfig.SetUpDB()
+	if err != nil{
+		fmt.Println("Error", err)
+	}
+	reviewRepo := db.NewReviewRepositoryImpl(dbConnector)
+
 	server := &http.Server{
 		Addr : app.Config.Address,
 	    ReadTimeout:    10 * time.Second,
