@@ -34,6 +34,6 @@ func(app *Application) Run(){
 	    ReadTimeout:    10 * time.Second,
 	    WriteTimeout:   10 * time.Second,
 	}
-	fmt.Println("Server is running on port :", server.Addr)
+	fmt.Println("Server is running on port", server.Addr)
 	server.ListenAndServe()
 }
