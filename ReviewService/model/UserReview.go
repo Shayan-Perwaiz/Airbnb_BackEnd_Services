@@ -9,7 +9,7 @@ type UserReview struct {
 	hotelId    int64
 	bookingId  int64
 	comment    string
-	rating     string
+	rating     float64
 	createdAt  time.Time
 	updatedAt  time.Time
 }

@@ -3,8 +3,10 @@ package app
 import (
 	dbconfig "GoReview/configs/db"
 	config "GoReview/configs/env"
-	"GoReview/repository/db"
+	controller "GoReview/controllers"
+	db "GoReview/db/repository"
 	"GoReview/router"
+	service "GoReview/services"
 	"fmt"
 	"net/http"
 	"time"
@@ -36,11 +38,15 @@ func(app *Application) Run(){
 	if err != nil{
 		fmt.Println("Error", err)
 	}
-	reviewRepo := db.NewReviewRepositoryImpl(dbConnector)
+	urd := db.NewReviewRepositoryImpl(dbConnector)
+	urs := service.NewUserReviewServiceImpl(urd)
+	urc := controller.NewUserReviewController(urs)
+	urr := router.NewReviewRouter(urc)
+
 
 	server := &http.Server{
 		Addr : app.Config.Address,
-		Handler: router.SetUpRouter(),
+		Handler: router.SetUpRouter(urr),
 	    ReadTimeout:    10 * time.Second,
 	    WriteTimeout:   10 * time.Second,
 	}
