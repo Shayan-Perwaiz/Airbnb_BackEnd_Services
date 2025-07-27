@@ -1,16 +1,14 @@
 package db
 
 import (
+	"GoReview/dto"
 	"database/sql"
 	"fmt"
 	"time"
 )
 
 type ReviewRepository interface {
-	CreateUserReview(user_id int64, hotel_id int64,
-		booking_id int64, comment string,
-		rating float64, created_at time.Time,
-		updated_at time.Time) error
+	CreateUserReview(payload *dto.UserReviewDto) error
 }
 
 type ReviewRepositoryImpl struct {
@@ -23,10 +21,7 @@ func NewReviewRepositoryImpl(_db *sql.DB) *ReviewRepositoryImpl{
 	}
 }
 
-func(rr *ReviewRepositoryImpl) CreateUserReview(user_id int64, hotel_id int64,
-	 booking_id int64, comment string, 
-	 rating float64, created_at time.Time, 
-	 updated_at time.Time) error{
+func(rr *ReviewRepositoryImpl) CreateUserReview(payload *dto.UserReviewDto) error{
 	query := `
 	INSERT INTO user_reviews (
 		user_id,
@@ -38,7 +33,8 @@ func(rr *ReviewRepositoryImpl) CreateUserReview(user_id int64, hotel_id int64,
 		updated_at
 	) VALUES (?, ?, ?, ?, ?, ?, ?)
 `
-	result, err := rr.db.Exec(query, user_id, hotel_id, booking_id, comment, rating, created_at, updated_at)
+	// result, err := rr.db.Exec(query, user_id, hotel_id, booking_id, comment, rating, created_at, updated_at)
+	result, err := rr.db.Exec(query, payload.UserID, payload.HotelID, payload.BookingId, payload.Comment, payload.Rating, time.Now(), time.Now())
 	if err != nil{
 		fmt.Println("Error inserting values into user review table")
 		return err

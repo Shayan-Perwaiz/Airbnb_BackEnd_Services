@@ -2,12 +2,12 @@ package service
 
 import (
 	db "GoReview/db/repository"
+	"GoReview/dto"
 	"fmt"
-	"time"
 )
 
 type UserReviewService interface {
-	CreateUserReview() error
+	CreateUserReview(payload *dto.UserReviewDto) error
 }
 
 type UserReviewServiceImpl struct {
@@ -20,9 +20,11 @@ func NewUserReviewServiceImpl(_userReviewRepository db.ReviewRepository) *UserRe
 	}
 }
 
-func(urs *UserReviewServiceImpl) CreateUserReview() error{
+func(urs *UserReviewServiceImpl) CreateUserReview(payload *dto.UserReviewDto) error{
 	fmt.Println("This is Service Layer")
-	err := urs.userReviewRepository.CreateUserReview(101, 202, 303, "Great stay with excellent service!", 4.5, time.Now(), time.Now())
+	// err := urs.userReviewRepository.CreateUserReview(101, 202, 303, "Great stay with excellent service!", 4.5, time.Now(), time.Now())
+	err := urs.userReviewRepository.CreateUserReview(payload)
+
 	if err != nil{
 		fmt.Println("Review Service -> Error inserting the value", err)
 		return err
