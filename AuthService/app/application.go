@@ -18,7 +18,6 @@ type Config struct {
 
 type Application struct {
 	Config Config
-	Store db.Storage
 }
 
 
