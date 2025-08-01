@@ -6,6 +6,9 @@ import (
 	util "GoAuth/utils"
 	"fmt"
 	"net/http"
+	"strconv"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type UserController struct {
@@ -32,7 +35,7 @@ func (uc *UserController) LoginUser(w http.ResponseWriter, r *http.Request){
 
 	jwtToken, err := uc.userService.LoginUser(&payload)
 	if err != nil{
-		util.WriteJsonErrorResponse(w, "User error logging in", "unable to create login token")
+		util.WriteJsonErrorResponse(w, err, http.StatusBadRequest)
 		return
 	}
 	util.WriteJsonSuccessResponse(w, "User logged in Successfully", jwtToken)
@@ -41,7 +44,17 @@ func (uc *UserController) LoginUser(w http.ResponseWriter, r *http.Request){
 
 func (uc *UserController) FetchUserbyId(w http.ResponseWriter, r *http.Request){
 	fmt.Println("fetching user by Id")
-	uc.userService.UserById()
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.ParseInt(idStr, 10, 64) 
+	if err != nil{
+		util.WriteJsonErrorResponse(w, fmt.Errorf("invalid ID: %v", err), http.StatusBadRequest)
+	}
+
+	iderr := uc.userService.FindUserById(id)
+	if iderr != nil{
+		util.WriteJsonErrorResponse(w, err, http.StatusNotFound)
+		return
+	}
 	w.Write([]byte("fetch by id endpoint"))
 }
 

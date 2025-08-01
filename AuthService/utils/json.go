@@ -36,12 +36,11 @@ func WriteJsonSuccessResponse(w http.ResponseWriter, message string, data any) e
 	return json.NewEncoder(w).Encode(response_data)
 }
 
-func WriteJsonErrorResponse(w http.ResponseWriter, message string, data any) error{
+func WriteJsonErrorResponse(w http.ResponseWriter, err error, statusCode int) error{
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusBadRequest)
+	w.WriteHeader(statusCode)
 	response_data := map[string] any{
-		"message" : message,
-		"data" : data,
+		"error" : err.Error(),
 		"success" : false,
 	}
 	return json.NewEncoder(w).Encode(response_data)

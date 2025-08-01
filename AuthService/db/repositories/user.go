@@ -7,9 +7,10 @@ import (
 )
 
 type UserRepository interface {
+	
+	Create(username string, email string, password string) error
 	GetAll() ([]*models.User, error)
 	DeleteById(id int64) error
-	Create(username string, email string, password string) error
 	GetUserByEmail(email string)  (*models.User, error)
 	GetUserByID(id int64) (*models.User, error)
 }

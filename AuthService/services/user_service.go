@@ -5,6 +5,7 @@ import (
 	db "GoAuth/db/repositories"
 	"GoAuth/dto"
 	util "GoAuth/utils"
+	"errors"
 	"fmt"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -13,9 +14,11 @@ import (
 
 type UserService interface {
 	CreateUser() error
+	RemoveUserById(id int64) error
 	LoginUser(payload *dto.LoginUserRequestDto) (string,error)
-	UserById() error
+	FindUserById(id int64) error
 	GetAllUsers() error
+	
 }
 
 type UserServiceImpl struct {
@@ -35,21 +38,24 @@ func (us *UserServiceImpl) CreateUser() error{
 	us.userRepository.Create("filzi", "filzi@123gmail.com", hashedPassword)
 	return nil
 }
+func (us *UserServiceImpl) RemoveUserById(id int64) error{
+	return nil
+}
 
 func (us *UserServiceImpl) LoginUser(payload *dto.LoginUserRequestDto) (string,error){
 	userDetail, err := us.userRepository.GetUserByEmail(payload.Email)
 	if err != nil{
 		fmt.Println("Error fetching the user")
-		return "", err
+		return "", errors.New("error fetching the user")
 	}
 	if userDetail == nil {
-		fmt.Print("No user found with the given email")
-		return "",err
+		return "",fmt.Errorf("no users found with this email: %s", payload.Email)
 	}
 	isValidPassword := util.ValidatePassword(userDetail.Password, payload.Password)
 
 	if !isValidPassword{
 		fmt.Println("Password does not match")
+		return "", errors.New("invalid Password")
 	}
 
 	fmt.Println("Here is the user details below: ")
@@ -70,24 +76,23 @@ func (us *UserServiceImpl) LoginUser(payload *dto.LoginUserRequestDto) (string,e
 	tokenString, err := token.SignedString([]byte(configEnv.GetString("JWT_TOKEN", "TOKEN")))
 	if err != nil{
 		fmt.Println("error creating a JWT token")
-		return  "",err
+		return  "",errors.New("error creating a JWT token")
 	}
 	fmt.Println("JWT Token :",tokenString)
 
 	return tokenString, nil
 }
 
-func(us *UserServiceImpl) UserById() error{
-	var id int64 = 3
+func(us *UserServiceImpl) FindUserById(id int64) error{
 	user, err := us.userRepository.GetUserByID(id)
 	if err != nil{
 		fmt.Println("error fetching the user")
-		return err
+		return errors.New("error fetching the user")
 	}
 
 	if user == nil{
 		fmt.Println("no user found with id", id)
-		return err
+		return fmt.Errorf("no users found with this id: %d", id)
 	}
 	fmt.Println(user)
 	return nil
