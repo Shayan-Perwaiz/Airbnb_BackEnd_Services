@@ -7,8 +7,10 @@ import (
 )
 
 type HotelRepository interface {
+	InsertHotel() error
 	FindHotelById(hotelId int64) (*model.Hotel, error)
 	HotelByName(hotelName string) (*model.Hotel, error)
+	GetAll() ([]model.Hotel, error)
 	DeleteById(id int64) error
 }
 
@@ -20,6 +22,27 @@ func NewHotelRepositoryImpl(_db *sql.DB) HotelRepository{
 	return &HotelRepositoryImpl{
 		db : _db,
 	}
+}
+
+func(repo *HotelRepositoryImpl) InsertHotel() error{
+	query := "INSERT INTO hotels(name, address, city) VALUES (?, ?, ?)"
+	result, err := repo.db.Exec(query)
+	if err != nil{
+		fmt.Println("failed to insert hotel", err)
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil{
+		fmt.Println("failed to get rows affected:", err)
+		return err
+	}
+	if rowsAffected == 0{
+		fmt.Println("no row inserted in hotel table")
+		return err
+	}
+	fmt.Println("Hotel inserted successfully with ID:")
+	return nil
+
 }
 
 func(repo *HotelRepositoryImpl) FindHotelById(hotelId int64) (*model.Hotel, error){
@@ -49,8 +72,29 @@ func(repo *HotelRepositoryImpl) HotelByName(hotelName string) (*model.Hotel, err
 	return hotel, nil
 }
 
-func(repo *HotelRepositoryImpl) GetAll(){
+func(repo *HotelRepositoryImpl) GetAll() ([]model.Hotel, error){
+	var hotels []model.Hotel
+	query := "SELECT * FROM hotels"
+	rows, err := repo.db.Query(query)
+	if err != nil{
+		fmt.Println("query failed for getAll() hotels")
+		return nil, err
 
+	}
+	defer rows.Close()
+	for rows.Next(){
+		hotel := &model.Hotel{}
+		if err := rows.Scan(&hotel.Id, &hotel.Name, &hotel.Address, &hotel.City); err != nil{
+			fmt.Println("faled to scan hotel", err)
+			return nil, err
+		}
+		hotels = append(hotels, *hotel)
+	}
+	if err := rows.Err(); err != nil{
+		fmt.Println("row iteration error:", err)
+		return nil, err
+	}
+	return hotels, nil
 }
 
 func(repo *HotelRepositoryImpl) DeleteById(id int64) error{
